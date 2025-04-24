@@ -13,4 +13,5 @@ class Pattern
     highToLowMost();
     readFile();
     userSearch();
+    resize();
 };
