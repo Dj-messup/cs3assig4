@@ -7,10 +7,8 @@ class Pattern
 
     public:
     Pattern();
-    lowToHighLeast();
-    highToLowLeast();
-    lowToHighMost();
-    highToLowMost();
+    leastFrequent();
+    mostFrequent();
     readFile();
     userSearch();
     resize();
