@@ -7,9 +7,10 @@ class Pattern
 
     public:
     Pattern();
-    leastFrequent();
-    mostFrequent();
-    readFile();
-    userSearch();
-    resize();
+    void leastFrequent();
+    void mostFrequent();
+    void readFile();
+    void userSearch();
+    void resize();
+    void strConv();
 };
