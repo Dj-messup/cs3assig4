@@ -1,5 +1,6 @@
 #include <iostream>
-#include "matching.h"
+#include <cstring>
+#include "linear.h"
 
 LinearTable::LinearTable(int initialSize) {
     tableSize = initialSize;
