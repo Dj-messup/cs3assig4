@@ -24,7 +24,7 @@ HashTable::~HashTable() {
 int HashTable::hash(const char* word) {
     unsigned int hashValue = 0;
     for (int i = 0; word[i] != '\0'; ++i) {
-        hashValue = (hashValue * 31) + word[i];
+        hashValue = hashValue + word[i];
     }
     return hashValue % tableSize;
 }
