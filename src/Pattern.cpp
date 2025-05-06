@@ -1,9 +1,4 @@
-#include <iostream>
-#include <fstream>
-#include <cctype>
-#include <cstring>
-#include "finalAssignment.h"
-#include "chaining.h"
+#include "Pattern.h"
 
 using namespace std;
 

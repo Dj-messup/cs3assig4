@@ -1,7 +1,11 @@
-#pragma once
-#include "chaining.h"
-#include "linear.h"
+#ifndef PATTERN
+#define PATTERN
+
+#include "Linear.h"
+#include "Chaining.h"
 #include "DynamicArray.h"
+#include <iostream>
+#include <fstream>
 
 class Pattern
 {
@@ -25,3 +29,5 @@ public:
     void userSearch();
     void strConv(char *);
 };
+
+#endif

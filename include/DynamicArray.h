@@ -92,20 +92,14 @@ const T &DynamicArray<T>::operator[](size_t index) const
 template <typename T>
 T &DynamicArray<T>::at(size_t index)
 {
-    if (index >= size)
-    {
-        throw std::out_of_range("Index out of range");
-    }
+    assert(index < size);
     return data[index];
 }
 
 template <typename T>
 const T &DynamicArray<T>::at(size_t index) const
 {
-    if (index >= size)
-    {
-        throw std::out_of_range("Index out of range");
-    }
+    assert(index < size);
     return data[index];
 }
 
