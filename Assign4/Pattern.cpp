@@ -1,7 +1,7 @@
 #include "Pattern.h"
 using namespace std;
 
-void Pattern::processWord(const char* input, char* output)
+void Pattern::processWord(const char *input, char *output)
 {
     int out_pos = 0;
     bool last_was_hyphen = false;
@@ -10,12 +10,16 @@ void Pattern::processWord(const char* input, char* output)
     {
         char c = tolower(input[i]);
 
-        if (c == '-') {
-            if (!last_was_hyphen) {
+        if (c == '-')
+        {
+            if (!last_was_hyphen)
+            {
                 output[out_pos++] = c;
                 last_was_hyphen = true;
             }
-        } else {
+        }
+        else
+        {
             output[out_pos++] = c;
             last_was_hyphen = false;
         }
@@ -23,15 +27,74 @@ void Pattern::processWord(const char* input, char* output)
     output[out_pos] = '\0';
 }
 
-void Pattern::sortWordCounts(DynamicArray<FreqEntry>& wordCounts, bool descending)
+void Pattern::countWordFrequencies(const char *filename, DynamicArray<FreqEntry> &wordCounts)
+{
+
+    ifstream inputFile(filename);
+
+    if (!inputFile.is_open())
+
+    {
+
+        cerr << "Error opening file: " << filename << endl;
+
+        return;
+    }
+
+    char word[256];
+
+    char processed[256];
+
+    while (inputFile >> word)
+
+    {
+
+        processWord(word, processed);
+
+        if (strlen(processed) == 0)
+
+            continue;
+
+        bool found = false;
+
+        for (size_t i = 0; i < wordCounts.getSize(); i++)
+
+        {
+
+            if (strcmp(wordCounts[i].word, processed) == 0)
+
+            {
+
+                wordCounts[i].count++;
+
+                found = true;
+
+                break;
+            }
+        }
+
+        if (!found)
+
+        {
+
+            FreqEntry wf(processed);
+
+            wordCounts.push_back(wf);
+        }
+    }
+
+    inputFile.close();
+}
+
+void Pattern::sortWordCounts(DynamicArray<FreqEntry> &wordCounts, bool descending)
 {
     for (size_t i = 0; i < wordCounts.getSize() - 1; i++)
     {
         for (size_t j = 0; j < wordCounts.getSize() - i - 1; j++)
         {
             bool shouldSwap = descending
-                ? (wordCounts[j].count < wordCounts[j + 1].count)
-                : (wordCounts[j].count > wordCounts[j + 1].count);
+                                  ? (wordCounts[j].count < wordCounts[j + 1].count)
+                                  : (wordCounts[j].count > wordCounts[j + 1].count);
 
             if (shouldSwap)
             {
@@ -43,10 +106,11 @@ void Pattern::sortWordCounts(DynamicArray<FreqEntry>& wordCounts, bool descendin
     }
 }
 
-void Pattern::outputFrequencyList(DynamicArray<FreqEntry>& wordCounts, const char* filename, const char* title)
+void Pattern::outputFrequencyList(DynamicArray<FreqEntry> &wordCounts, const char *filename, const char *title)
 {
     ofstream outputFile(filename, ios::app);
-    if (!outputFile.is_open()) {
+    if (!outputFile.is_open())
+    {
         cerr << "Error opening output file: " << filename << endl;
         return;
     }
@@ -70,6 +134,7 @@ Pattern::Pattern(int tableSize)
     hashTable = new HashTable(tableSize);
     linearTable = new LinearTable(tableSize);
     workNum = 0;
+    countWordFrequencies("A_Scandal_In_Bohemia.txt", wordCounts);
 }
 
 Pattern::~Pattern()
@@ -107,21 +172,27 @@ void Pattern::readFile()
     {
         strConv(word);
 
-        if (strlen(word) == 1 && word[0] >= 'i' && word[0] <= 'x') {
+        if (strlen(word) == 1 && word[0] >= 'i' && word[0] <= 'x')
+        {
             workNum++;
             continue;
         }
 
-        if (strlen(word) == 0) continue;
+        if (strlen(word) == 0)
+            continue;
 
-        if (workNum >= 1 && workNum <= 6) {
+        if (workNum >= 1 && workNum <= 6)
+        {
             hashTable->insert(word);
-        } else if (workNum >= 7 && workNum <= 12) {
+        }
+        else if (workNum >= 7 && workNum <= 12)
+        {
             linearTable->insert(word);
         }
 
         processWord(word, processed);
-        if (strlen(processed) == 0) continue;
+        if (strlen(processed) == 0)
+            continue;
 
         bool found = false;
         for (size_t i = 0; i < wordCounts.getSize(); ++i)
@@ -143,27 +214,31 @@ void Pattern::readFile()
     inFile.close();
 }
 
-void Pattern::strConv(char* word)
+void Pattern::strConv(char *word)
 {
     int len = strlen(word);
     int j = 0;
     for (int i = 0; i < len; ++i)
     {
-        if (word[i] == '-' && word[i + 1] == '-') {
+        if (word[i] == '-' && word[i + 1] == '-')
+        {
             ++i;
             continue;
         }
-        if (isalpha(word[i]) || word[i] == '-') {
+        if (isalpha(word[i]) || word[i] == '-')
+        {
             word[j++] = tolower(word[i]);
         }
     }
     word[j] = '\0';
 }
 
-int Pattern::getCount(const char* word)
+int Pattern::getCount(const char *word)
 {
     int count = 0;
-    if (hashTable) count += hashTable->getCount(word);
-    if (linearTable) count += linearTable->getCount(word);
+    if (hashTable)
+        count += hashTable->getCount(word);
+    if (linearTable)
+        count += linearTable->getCount(word);
     return count;
 }

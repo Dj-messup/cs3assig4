@@ -3,7 +3,12 @@
 
 using namespace std;
 
-int main() 
+int main()
 {
+    Pattern pattern = Pattern(256);
+
+    pattern.leastFrequent();
+    pattern.mostFrequent();
+
     return 0;
 }
