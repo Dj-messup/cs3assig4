@@ -129,6 +129,98 @@ void Pattern::outputFrequencyList(DynamicArray<FreqEntry> &wordCounts, const cha
     outputFile.close();
 }
 
+string Pattern::extractStoryIX(const string &filename)
+{
+    ifstream file(filename);
+    if (!file.is_open())
+    {
+        throw runtime_error("Error opening file: " + filename);
+    }
+
+    stringstream buffer;
+    string line;
+    bool inStoryIX = false;
+    const string storyStartMarker = "IX. THE ADVENTURE OF THE ENGINEER'S THUMB";
+    const string storyEndMarker = "X. THE ADVENTURE OF";
+
+    while (getline(file, line))
+    {
+        if (line.find(storyStartMarker) != string::npos)
+        {
+            inStoryIX = true;
+            continue;
+        }
+        if (inStoryIX && line.find(storyEndMarker) != string::npos)
+        {
+            break;
+        }
+        if (inStoryIX)
+        {
+            buffer << line << "\n";
+        }
+    }
+
+    if (buffer.str().empty())
+    {
+        throw runtime_error("Story IX not found in file");
+    }
+
+    return buffer.str();
+}
+
+DynamicArray<string> Pattern::splitString(const string &input, const string &delimiter)
+{
+    DynamicArray<string> tokens;
+    size_t start = 0;
+    size_t end = input.find(delimiter);
+
+    while (end != string::npos)
+    {
+        tokens.push_back(input.substr(start, end - start));
+        start = end + delimiter.length();
+        end = input.find(delimiter, start);
+    }
+    tokens.push_back(input.substr(start));
+    return tokens;
+}
+
+DynamicArray<Pair<string, size_t>> Pattern::getWordsWithPositions(const string &text)
+{
+    DynamicArray<Pair<string, size_t>> words;
+    string currentWord;
+    size_t position = 0;
+    bool inWord = false;
+
+    for (size_t i = 0; i < text.length(); i++)
+    {
+        if (isalpha(text[i]))
+        {
+            if (!inWord)
+            {
+                position = words.getSize() + 1;
+                inWord = true;
+            }
+            currentWord += tolower(text[i]);
+        }
+        else
+        {
+            if (inWord)
+            {
+                words.push_back(Pair<string, size_t>(currentWord, position));
+                currentWord.clear();
+                inWord = false;
+            }
+        }
+    }
+
+    if (!currentWord.empty())
+    {
+        words.push_back(Pair<string, size_t>(currentWord, position));
+    }
+
+    return words;
+}
+
 Pattern::Pattern(int tableSize)
 {
     hashTable = new HashTable(tableSize);
@@ -212,6 +304,81 @@ void Pattern::readFile()
     }
 
     inFile.close();
+}
+
+void Pattern::userSearch()
+{
+    string text = extractStoryIX("A_Scandal_In_Bohemia.txt");
+    auto wordsWithPositions = getWordsWithPositions(text);
+
+    string searchText;
+    for (size_t i = 0; i < wordsWithPositions.getSize(); i++)
+    {
+        searchText += wordsWithPositions[i].first + " ";
+    }
+
+    cout << "Enter up to 8 search keys, separated by '@@@' if less than 8: ";
+    string input;
+    getline(cin, input);
+
+    auto patterns = splitString(input, "@@@");
+    if (patterns.getSize() > 8)
+    {
+        cout << "Warning: Only the first 8 patterns will be used." << endl;
+        DynamicArray<string> temp;
+        for (size_t i = 0; i < 8; i++)
+        {
+            temp.push_back(patterns[i]);
+        }
+        patterns = temp;
+    }
+
+    RabinKarp rk;
+
+    for (size_t p = 0; p < patterns.getSize(); p++)
+    {
+        if (patterns[p].empty())
+            continue;
+
+        string lowercasePattern;
+        for (size_t i = 0; i < patterns[p].length(); i++)
+        {
+            lowercasePattern += tolower(patterns[p][i]);
+        }
+
+        const DynamicArray<int> &occurrences = rk.search(searchText, lowercasePattern);
+
+        cout << "\nPattern: '" << patterns[p] << "' found at word positions: ";
+        if (occurrences.getSize() == 0)
+        {
+            cout << "Not found";
+        }
+        else
+        {
+            for (int i = 0; i < occurrences.getSize(); i++)
+            {
+                size_t wordPos = 0;
+                size_t charPos = occurrences[i];
+                size_t spaceCount = 0;
+
+                for (size_t j = 0; j < charPos; j++)
+                {
+                    if (searchText[j] == ' ')
+                    {
+                        spaceCount++;
+                    }
+                }
+                wordPos = spaceCount + 1;
+
+                cout << wordPos;
+                if (i < occurrences.getSize() - 1)
+                {
+                    cout << ", ";
+                }
+            }
+        }
+        cout << endl;
+    }
 }
 
 void Pattern::strConv(char *word)

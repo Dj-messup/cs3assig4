@@ -22,8 +22,11 @@ public:
     T &at(size_t index);
     const T &at(size_t index) const;
     size_t getSize();
+    size_t getSize() const;
     size_t getCapacity();
+    size_t getCapacity() const;
     bool isEmpty();
+    bool isEmpty() const;
     void push_back(const T &value);
     void pop_back();
     void clear();
@@ -111,13 +114,31 @@ size_t DynamicArray<T>::getSize()
 }
 
 template <typename T>
+size_t DynamicArray<T>::getSize() const
+{
+    return size;
+}
+
+template <typename T>
 size_t DynamicArray<T>::getCapacity()
 {
     return capacity;
 }
 
 template <typename T>
+size_t DynamicArray<T>::getCapacity() const
+{
+    return capacity;
+}
+
+template <typename T>
 bool DynamicArray<T>::isEmpty()
+{
+    return size == 0;
+}
+
+template <typename T>
+bool DynamicArray<T>::isEmpty() const
 {
     return size == 0;
 }

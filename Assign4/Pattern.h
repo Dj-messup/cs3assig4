@@ -4,8 +4,11 @@
 #include "Linear.h"
 #include "Chaining.h"
 #include "DynamicArray.h"
+#include "RabinKarp.h"
+#include "Pair.h"
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 class Pattern
 {
@@ -32,6 +35,10 @@ private:
     void countWordFrequencies(const char *filename, DynamicArray<FreqEntry> &wordCounts);
     void sortWordCounts(DynamicArray<FreqEntry> &wordCounts, bool descending);
     void outputFrequencyList(DynamicArray<FreqEntry> &wordCounts, const char *filename, const char *title);
+
+    std::string extractStoryIX(const std::string &filename);
+    DynamicArray<std::string> splitString(const std::string &input, const std::string &delimiter);
+    DynamicArray<Pair<std::string, size_t>> getWordsWithPositions(const std::string &text);
 
 public:
     Pattern(int tableSize);
