@@ -18,9 +18,15 @@ CPPFILES = FinalAssignment.cpp Linear.cpp Chaining.cpp Logger.cpp RabinKarp.cpp 
 # make all rule/default rule that'll be run when we run "make"
 # first compile each file to object file
 # then make a single binary program
-all:
-	$(CXX) $(CXXFLAGS) $(CPPFILES)
-	$(CXX) -o $(PROGRAM) *.o
+all: $(PROGRAM)
+
+# Compile each .cpp file into .o file
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -o $@ $<
+
+# Link all object files into the final program
+$(PROGRAM): $(CPPFILES:.cpp=.o)
+	$(CXX) -o $(PROGRAM) $(CPPFILES:.cpp=.o)
 
 # make clean rule
 # delete object and binary files

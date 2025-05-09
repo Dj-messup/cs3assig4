@@ -1,15 +1,32 @@
 #include "Pattern.h"
 using namespace std;
 
+Pattern::Pattern(int chainSize, int linearSize)
+{
+    this->chainSize = chainSize;
+    this->linearSize = linearSize;
+    hashTable = new HashTable(chainSize);
+    linearTable = new LinearTable(linearSize);
+    workNum = 0;
+    chainInsertCount = 0;
+    linearInsertCount = 0;
+    sentenceCount = 0;
+    countWordFrequencies("A_Scandal_In_Bohemia.txt", wordCounts);
+}
+
+Pattern::~Pattern()
+{
+    delete hashTable;
+    delete linearTable;
+}
+
 void Pattern::processWord(const char *input, char *output)
 {
     int out_pos = 0;
     bool last_was_hyphen = false;
-
     for (int i = 0; input[i] != '\0' && out_pos < 255; i++)
     {
         char c = tolower(input[i]);
-
         if (c == '-')
         {
             if (!last_was_hyphen)
@@ -29,56 +46,35 @@ void Pattern::processWord(const char *input, char *output)
 
 void Pattern::countWordFrequencies(const char *filename, DynamicArray<FreqEntry> &wordCounts)
 {
-
     ifstream inputFile(filename);
-
     if (!inputFile.is_open())
-
     {
-
         cerr << "Error opening file: " << filename << endl;
-
         return;
     }
 
-    char word[256];
-
-    char processed[256];
-
+    char word[256], processed[256];
     while (inputFile >> word)
-
     {
-
         processWord(word, processed);
 
         if (strlen(processed) == 0)
-
             continue;
 
         bool found = false;
-
         for (size_t i = 0; i < wordCounts.getSize(); i++)
-
         {
-
             if (strcmp(wordCounts[i].word, processed) == 0)
-
             {
-
                 wordCounts[i].count++;
-
                 found = true;
-
                 break;
             }
         }
 
         if (!found)
-
         {
-
             FreqEntry wf(processed);
-
             wordCounts.push_back(wf);
         }
     }
@@ -93,8 +89,8 @@ void Pattern::sortWordCounts(DynamicArray<FreqEntry> &wordCounts, bool descendin
         for (size_t j = 0; j < wordCounts.getSize() - i - 1; j++)
         {
             bool shouldSwap = descending
-                                  ? (wordCounts[j].count < wordCounts[j + 1].count)
-                                  : (wordCounts[j].count > wordCounts[j + 1].count);
+                ? (wordCounts[j].count < wordCounts[j + 1].count)
+                : (wordCounts[j].count > wordCounts[j + 1].count);
 
             if (shouldSwap)
             {
@@ -129,110 +125,11 @@ void Pattern::outputFrequencyList(DynamicArray<FreqEntry> &wordCounts, const cha
     outputFile.close();
 }
 
-string Pattern::extractStoryIX(const string &filename)
+void Pattern::mostFrequent()
 {
-    ifstream file(filename);
-    if (!file.is_open())
-    {
-        throw runtime_error("Error opening file: " + filename);
-    }
-
-    stringstream buffer;
-    string line;
-    bool inStoryIX = false;
-    const string storyStartMarker = "IX. THE ADVENTURE OF THE ENGINEER'S THUMB";
-    const string storyEndMarker = "X. THE ADVENTURE OF";
-
-    while (getline(file, line))
-    {
-        if (line.find(storyStartMarker) != string::npos)
-        {
-            inStoryIX = true;
-            continue;
-        }
-        if (inStoryIX && line.find(storyEndMarker) != string::npos)
-        {
-            break;
-        }
-        if (inStoryIX)
-        {
-            buffer << line << "\n";
-        }
-    }
-
-    if (buffer.str().empty())
-    {
-        throw runtime_error("Story IX not found in file");
-    }
-
-    return buffer.str();
-}
-
-DynamicArray<string> Pattern::splitString(const string &input, const string &delimiter)
-{
-    DynamicArray<string> tokens;
-    size_t start = 0;
-    size_t end = input.find(delimiter);
-
-    while (end != string::npos)
-    {
-        tokens.push_back(input.substr(start, end - start));
-        start = end + delimiter.length();
-        end = input.find(delimiter, start);
-    }
-    tokens.push_back(input.substr(start));
-    return tokens;
-}
-
-DynamicArray<Pair<string, size_t>> Pattern::getWordsWithPositions(const string &text)
-{
-    DynamicArray<Pair<string, size_t>> words;
-    string currentWord;
-    size_t position = 0;
-    bool inWord = false;
-
-    for (size_t i = 0; i < text.length(); i++)
-    {
-        if (isalpha(text[i]))
-        {
-            if (!inWord)
-            {
-                position = words.getSize() + 1;
-                inWord = true;
-            }
-            currentWord += tolower(text[i]);
-        }
-        else
-        {
-            if (inWord)
-            {
-                words.push_back(Pair<string, size_t>(currentWord, position));
-                currentWord.clear();
-                inWord = false;
-            }
-        }
-    }
-
-    if (!currentWord.empty())
-    {
-        words.push_back(Pair<string, size_t>(currentWord, position));
-    }
-
-    return words;
-}
-
-Pattern::Pattern(int tableSize)
-{
-    hashTable = new HashTable(tableSize);
-    linearTable = new LinearTable(tableSize);
-    workNum = 0;
-    countWordFrequencies("A_Scandal_In_Bohemia.txt", wordCounts);
-}
-
-Pattern::~Pattern()
-{
-    delete hashTable;
-    delete linearTable;
+    DynamicArray<FreqEntry> mostFrequent = wordCounts;
+    sortWordCounts(mostFrequent, true);
+    outputFrequencyList(mostFrequent, "frequencies.txt", "80 Most Frequent Words");
 }
 
 void Pattern::leastFrequent()
@@ -240,13 +137,6 @@ void Pattern::leastFrequent()
     DynamicArray<FreqEntry> leastFrequent = wordCounts;
     sortWordCounts(leastFrequent, false);
     outputFrequencyList(leastFrequent, "frequencies.txt", "80 Least Frequent Words");
-}
-
-void Pattern::mostFrequent()
-{
-    DynamicArray<FreqEntry> mostFrequent = wordCounts;
-    sortWordCounts(mostFrequent, true);
-    outputFrequencyList(mostFrequent, "frequencies.txt", "80 Most Frequent Words");
 }
 
 void Pattern::readFile()
@@ -258,10 +148,13 @@ void Pattern::readFile()
         exit(1);
     }
 
-    char word[256];
-    char processed[256];
+    char word[256], processed[256];
     while (inFile >> word)
     {
+        size_t len = strlen(word);
+        if (len > 0 && (word[len - 1] == '.' || word[len - 1] == '!' || word[len - 1] == '?'))
+            sentenceCount++;
+
         strConv(word);
 
         if (strlen(word) == 1 && word[0] >= 'i' && word[0] <= 'x')
@@ -276,10 +169,12 @@ void Pattern::readFile()
         if (workNum >= 1 && workNum <= 6)
         {
             hashTable->insert(word);
+            chainInsertCount++;
         }
         else if (workNum >= 7 && workNum <= 12)
         {
             linearTable->insert(word);
+            linearInsertCount++;
         }
 
         processWord(word, processed);
@@ -304,6 +199,13 @@ void Pattern::readFile()
     }
 
     inFile.close();
+
+    Logger logger("logger.txt");
+    logger.log(INFO, "Chaining inserts: " + to_string(chainInsertCount));
+    logger.log(INFO, "Average chain length: " + to_string((double)chainInsertCount / chainSize));
+    logger.log(INFO, "Linear inserts: " + to_string(linearInsertCount));
+    logger.log(INFO, "Load factor: " + to_string((double)linearInsertCount / linearSize));
+    logger.log(INFO, "Sentence count: " + to_string(sentenceCount));
 }
 
 void Pattern::userSearch()
@@ -334,17 +236,14 @@ void Pattern::userSearch()
     }
 
     RabinKarp rk;
-
     for (size_t p = 0; p < patterns.getSize(); p++)
     {
         if (patterns[p].empty())
             continue;
 
         string lowercasePattern;
-        for (size_t i = 0; i < patterns[p].length(); i++)
-        {
-            lowercasePattern += tolower(patterns[p][i]);
-        }
+        for (char c : patterns[p])
+            lowercasePattern += tolower(c);
 
         const DynamicArray<int> &occurrences = rk.search(searchText, lowercasePattern);
 
@@ -357,24 +256,12 @@ void Pattern::userSearch()
         {
             for (int i = 0; i < occurrences.getSize(); i++)
             {
-                size_t wordPos = 0;
                 size_t charPos = occurrences[i];
                 size_t spaceCount = 0;
-
                 for (size_t j = 0; j < charPos; j++)
-                {
-                    if (searchText[j] == ' ')
-                    {
-                        spaceCount++;
-                    }
-                }
-                wordPos = spaceCount + 1;
-
-                cout << wordPos;
-                if (i < occurrences.getSize() - 1)
-                {
-                    cout << ", ";
-                }
+                    if (searchText[j] == ' ') spaceCount++;
+                cout << (spaceCount + 1);
+                if (i < occurrences.getSize() - 1) cout << ", ";
             }
         }
         cout << endl;
@@ -408,4 +295,96 @@ int Pattern::getCount(const char *word)
     if (linearTable)
         count += linearTable->getCount(word);
     return count;
+}
+
+std::string Pattern::extractStoryIX(const std::string &filename)
+{
+    std::ifstream file(filename);
+    if (!file.is_open())
+    {
+        throw std::runtime_error("Error opening file: " + filename);
+    }
+
+    std::stringstream buffer;
+    std::string line;
+    bool inStoryIX = false;
+    const std::string storyStartMarker = "IX. THE ADVENTURE OF THE ENGINEER'S THUMB";
+    const std::string storyEndMarker = "X. THE ADVENTURE OF";
+
+    while (getline(file, line))
+    {
+        if (line.find(storyStartMarker) != std::string::npos)
+        {
+            inStoryIX = true;
+            continue;
+        }
+        if (inStoryIX && line.find(storyEndMarker) != std::string::npos)
+        {
+            break;
+        }
+        if (inStoryIX)
+        {
+            buffer << line << "\n";
+        }
+    }
+
+    if (buffer.str().empty())
+    {
+        throw std::runtime_error("Story IX not found in file");
+    }
+
+    return buffer.str();
+}
+
+DynamicArray<std::string> Pattern::splitString(const std::string &input, const std::string &delimiter)
+{
+    DynamicArray<std::string> tokens;
+    size_t start = 0;
+    size_t end = input.find(delimiter);
+
+    while (end != std::string::npos)
+    {
+        tokens.push_back(input.substr(start, end - start));
+        start = end + delimiter.length();
+        end = input.find(delimiter, start);
+    }
+    tokens.push_back(input.substr(start));
+    return tokens;
+}
+
+DynamicArray<Pair<std::string, size_t>> Pattern::getWordsWithPositions(const std::string &text)
+{
+    DynamicArray<Pair<std::string, size_t>> words;
+    std::string currentWord;
+    size_t position = 0;
+    bool inWord = false;
+
+    for (size_t i = 0; i < text.length(); i++)
+    {
+        if (isalpha(text[i]))
+        {
+            if (!inWord)
+            {
+                position = words.getSize() + 1;
+                inWord = true;
+            }
+            currentWord += tolower(text[i]);
+        }
+        else
+        {
+            if (inWord)
+            {
+                words.push_back(Pair<std::string, size_t>(currentWord, position));
+                currentWord.clear();
+                inWord = false;
+            }
+        }
+    }
+
+    if (!currentWord.empty())
+    {
+        words.push_back(Pair<std::string, size_t>(currentWord, position));
+    }
+
+    return words;
 }

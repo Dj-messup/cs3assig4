@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <chrono>
+#include <cstring>
 #include "Pattern.h"
 #include "Logger.h"
 
@@ -18,12 +19,8 @@ void displayMenu()
     cout << "Enter your choice: ";
 }
 
-void processMenuChoice(Pattern &analyzer, Logger &logger)
+void processMenuChoice(Pattern &analyzer, Logger &logger, int choice)
 {
-    int choice;
-    cin >> choice;
-    cin.ignore();
-
     auto start = high_resolution_clock::now();
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<nanoseconds>(stop - start);
@@ -31,67 +28,63 @@ void processMenuChoice(Pattern &analyzer, Logger &logger)
     switch (choice)
     {
     case 1:
-    {
         start = high_resolution_clock::now();
         analyzer.userSearch();
         stop = high_resolution_clock::now();
         duration = duration_cast<nanoseconds>(stop - start);
-
-        logger.log(INFO, "Search completed in " + to_string(duration.count()) + " ns");
+        logger.log(INFO, "userSearch() completed in " + to_string(duration.count()) + " ns");
         break;
-    }
 
     case 2:
-    {
         start = high_resolution_clock::now();
         analyzer.mostFrequent();
         stop = high_resolution_clock::now();
         duration = duration_cast<nanoseconds>(stop - start);
-
-        logger.log(INFO, "Most frequent words listed in " + to_string(duration.count()) + " ns");
+        logger.log(INFO, "mostFrequent() completed in " + to_string(duration.count()) + " ns");
         cout << "80 most frequent words saved to frequencies.txt\n";
         break;
-    }
 
     case 3:
-    {
         start = high_resolution_clock::now();
         analyzer.leastFrequent();
         stop = high_resolution_clock::now();
         duration = duration_cast<nanoseconds>(stop - start);
-
-        logger.log(INFO, "Least frequent words listed in " + to_string(duration.count()) + " ns");
+        logger.log(INFO, "leastFrequent() completed in " + to_string(duration.count()) + " ns");
         cout << "80 least frequent words saved to frequencies.txt\n";
         break;
-    }
-
-    case 0:
-        cout << "Exiting program...\n";
-        exit(0);
 
     default:
         cout << "Invalid choice. Please try again.\n";
+        break;
     }
 }
 
-int main(int argc, char *argv[])
+int main()
 {
     Logger logger("logger.txt");
-    Pattern analyzer(1000);
 
-    try
+    Pattern analyzer(50, 119);
+
+    auto start = high_resolution_clock::now();
+    analyzer.readFile();
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<nanoseconds>(stop - start);
+    logger.log(INFO, "readFile() completed in " + to_string(duration.count()) + " ns");
+
+    while (true)
     {
-        while (true)
+        displayMenu();
+        int choice;
+        cin >> choice;
+        cin.ignore();
+
+        if (choice == 0)
         {
-            displayMenu();
-            processMenuChoice(analyzer, logger);
+            cout << "Exiting program...\n";
+            break;
         }
-    }
-    catch (const exception &e)
-    {
-        logger.log(ERROR, string("Fatal error: ") + e.what());
-        cerr << "Error: " << e.what() << endl;
-        return 1;
+
+        processMenuChoice(analyzer, logger, choice);
     }
 
     return 0;

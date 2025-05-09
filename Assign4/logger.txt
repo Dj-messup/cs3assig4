@@ -1,3 +1,6 @@
-[2025-05-07 16:00:15] [INFO] Most frequent words listed in 1065300375 ns
-[2025-05-07 16:00:22] [INFO] Least frequent words listed in 1465672459 ns
-[2025-05-07 16:00:27] [INFO] Search completed in 4140864417 ns
+[2025-05-09 04:50:03] [INFO] Chaining inserts: 418
+[2025-05-09 04:50:03] [INFO] Average chain length: 8.360000
+[2025-05-09 04:50:03] [INFO] Linear inserts: 95
+[2025-05-09 04:50:03] [INFO] Load factor: 0.798319
+[2025-05-09 04:50:03] [INFO] Sentence count: 5255
+[2025-05-09 04:50:03] [INFO] readFile() completed in 1844269463 ns
