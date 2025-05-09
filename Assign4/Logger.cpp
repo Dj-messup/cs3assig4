@@ -1,6 +1,7 @@
 #include <chrono>
 #include "Logger.h"
 
+// Turn enum into text
 std::string Logger::levelAsString(Level level)
 {
     switch (level)
@@ -20,6 +21,7 @@ std::string Logger::levelAsString(Level level)
     }
 }
 
+// Open file
 Logger::Logger(const std::string &file_name)
 {
     log_file.open(file_name, std::ios::app);
@@ -34,6 +36,7 @@ Logger::~Logger()
     log_file.close();
 }
 
+// Write a timestamped line
 void Logger::log(Level level, const std::string &message)
 {
     if (log_file.is_open())
@@ -47,6 +50,7 @@ void Logger::log(Level level, const std::string &message)
     }
 }
 
+// Write the sentence-count block in output file
 void Logger::printSentenceCount(std::ofstream& file, int sentenceCount)
 {
     file << "\n=== Sentence Count ===\n";

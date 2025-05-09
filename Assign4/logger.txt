@@ -1,15 +1,7 @@
-[2025-05-09 06:22:24] [INFO] Chaining inserts: 107020
-[2025-05-09 06:22:24] [INFO] Average chain length: 2140.400000
-[2025-05-09 06:22:24] [INFO] Linear inserts: 205
-[2025-05-09 06:22:24] [INFO] Load factor: 1.722689
-[2025-05-09 06:22:24] [INFO] Sentence count: 5255
-[2025-05-09 06:22:38] [INFO] userSearch() completed in 13706579180 ns
-[2025-05-09 06:22:41] [INFO] readFile() completed in 17680850925 ns
-[2025-05-09 06:27:23] [INFO] Task 0 completed in 10470 ns
-[2025-05-09 06:27:28] [INFO] Chaining inserts: 107020
-[2025-05-09 06:27:28] [INFO] Average chain length: 2140.400000
-[2025-05-09 06:27:28] [INFO] Linear inserts: 205
-[2025-05-09 06:27:28] [INFO] Load factor: 1.722689
-[2025-05-09 06:27:28] [INFO] Sentence count: 5255
-[2025-05-09 06:27:30] [INFO] userSearch() completed in 1440435608 ns
-[2025-05-09 06:27:33] [INFO] readFile() completed in 5393709996 ns
+[2025-05-09 03:43:27] [INFO] Chaining inserts: 107020
+[2025-05-09 03:43:27] [INFO] Average chain length: 2140.400000
+[2025-05-09 03:43:27] [INFO] Linear inserts: 205
+[2025-05-09 03:43:27] [INFO] Load factor: 1.722689
+[2025-05-09 03:43:27] [INFO] Sentence count: 5255
+[2025-05-09 03:43:49] [INFO] userSearch() completed in 21113064854 ns
+[2025-05-09 03:43:50] [INFO] readFile() completed in 23762438420 ns
