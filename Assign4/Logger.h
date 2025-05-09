@@ -1,5 +1,4 @@
-#ifndef LOGGER
-#define LOGGER
+#pragma once
 
 #include <iostream>
 #include <fstream>
@@ -26,5 +25,3 @@ public:
     void log(Level level, const std::string &message);
     static void printSentenceCount(std::ofstream& file, int sentenceCount);
 };
-
-#endif

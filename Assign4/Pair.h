@@ -1,5 +1,4 @@
-#ifndef PAIR_H
-#define PAIR_H
+#pragma once
 
 template <typename T1, typename T2>
 struct Pair
@@ -10,5 +9,3 @@ struct Pair
     Pair(const T1 &f, const T2 &s) : first(f), second(s) {}
     Pair(const Pair &other) : first(other.first), second(other.second) {}
 };
-
-#endif

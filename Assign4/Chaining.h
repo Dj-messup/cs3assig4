@@ -1,5 +1,4 @@
-#ifndef CHAINING
-#define CHAINING
+#pragma once
 
 #include <cstring>
 
@@ -29,5 +28,3 @@ public:
     void insert(const char* word);
     int getCount(const char* word);
 };
-
-#endif

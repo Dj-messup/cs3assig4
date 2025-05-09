@@ -1,5 +1,4 @@
-#ifndef LINEAR
-#define LINEAR
+#pragma once
 
 #include "DynamicArray.h"
 #include <cstring>
@@ -42,5 +41,3 @@ public:
     void insert(const char* word);
     int getCount(const char* word);
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef PATTERN
-#define PATTERN
+#pragma once
 
 #include "Linear.h"
 #include "Chaining.h"
@@ -58,5 +57,3 @@ public:
     void mostFrequent();
     int getCount(const char* word);
 };
-
-#endif

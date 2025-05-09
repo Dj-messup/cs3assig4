@@ -1,5 +1,4 @@
-#ifndef RABIN_KARP_H
-#define RABIN_KARP_H
+#pragma once
 
 #include "DynamicArray.h"
 #include <string>
@@ -15,5 +14,3 @@ public:
     RabinKarp(int base = 256, int prime = 101);
     const DynamicArray<int> &search(const std::string &text, const std::string &pattern);
 };
-
-#endif
