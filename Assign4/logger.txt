@@ -1,7 +1,2 @@
-[2025-05-09 03:43:27] [INFO] Chaining inserts: 107020
-[2025-05-09 03:43:27] [INFO] Average chain length: 2140.400000
-[2025-05-09 03:43:27] [INFO] Linear inserts: 205
-[2025-05-09 03:43:27] [INFO] Load factor: 1.722689
-[2025-05-09 03:43:27] [INFO] Sentence count: 5255
-[2025-05-09 03:43:49] [INFO] userSearch() completed in 21113064854 ns
-[2025-05-09 03:43:50] [INFO] readFile() completed in 23762438420 ns
+[2025-05-09 12:23:21] [INFO] Task 2 completed in 60417 ns
+[2025-05-09 12:23:35] [INFO] Task 0 completed in 60727 ns
