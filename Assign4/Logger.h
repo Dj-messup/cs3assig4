@@ -24,6 +24,7 @@ public:
     Logger(const std::string &file_name);
     ~Logger();
     void log(Level level, const std::string &message);
+    static void printSentenceCount(std::ofstream& file, int sentenceCount);
 };
 
 #endif

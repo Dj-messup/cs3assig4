@@ -1,39 +1,31 @@
-# compiler name
+# Compiler and flags
 CXX = g++
-
-# C++ compiler flags
-# -c : just do preprocess; compile and assemble into object files
-# -g : adds debugging information to the executable file
-# -Wall : turns on most, but not  all, compiler warnings
-# -std=c++17 : uses c++17 standard
-# put all the required flags separated by space
 CXXFLAGS = -c -g -Wall -std=c++17
 
-# the build target executable file; .exe is not required
+# Executable name
 PROGRAM = main.out
 
-# list all .cpp files separated by space
-CPPFILES = FinalAssignment.cpp Linear.cpp Chaining.cpp Logger.cpp RabinKarp.cpp Pattern.cpp
+# Source files
+CPPFILES = FinalAssignment.cpp Pattern.cpp RabinKarp.cpp Logger.cpp Linear.cpp Chaining.cpp
 
-# make all rule/default rule that'll be run when we run "make"
-# first compile each file to object file
-# then make a single binary program
+# Object files
+OBJFILES = $(CPPFILES:.cpp=.o)
+
+# Default rule
 all: $(PROGRAM)
 
-# Compile each .cpp file into .o file
+# Compile source files into object files
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -o $@ $<
 
-# Link all object files into the final program
-$(PROGRAM): $(CPPFILES:.cpp=.o)
-	$(CXX) -o $(PROGRAM) $(CPPFILES:.cpp=.o)
+# Link object files into final executable
+$(PROGRAM): $(OBJFILES)
+	$(CXX) -o $(PROGRAM) $(OBJFILES)
 
-# make clean rule
-# delete object and binary files
+# Clean rule
 clean:
-	rm -f $(PROGRAM) *.o
+	rm -f $(PROGRAM) *.o frequencies.txt logger.txt
 
-# FIXME
-# Add a rule to run the program
+# Run rule with example input/output
 run:
-	./$(PROGRAM)
+	./$(PROGRAM) "A_Scandal_In_Bohemia.txt" "frequencies.txt"

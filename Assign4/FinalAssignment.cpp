@@ -2,89 +2,85 @@
 #include <fstream>
 #include <chrono>
 #include <cstring>
+#include <cstdlib>
 #include "Pattern.h"
 #include "Logger.h"
 
 using namespace std;
 using namespace std::chrono;
 
-void displayMenu()
+int main(int argc, char* argv[])
 {
-    cout << "\n===== Conan Doyle Text Analysis =====\n";
-    cout << "1. Search for words in 'The Adventure of the Engineer's Thumb'\n";
-    cout << "2. Display 80 most frequent words\n";
-    cout << "3. Display 80 least frequent words\n";
-    cout << "0. Exit\n";
-    cout << "====================================\n";
-    cout << "Enter your choice: ";
-}
-
-void processMenuChoice(Pattern &analyzer, Logger &logger, int choice)
-{
-    auto start = high_resolution_clock::now();
-    auto stop = high_resolution_clock::now();
-    auto duration = duration_cast<nanoseconds>(stop - start);
-
-    switch (choice)
+    if (argc < 3)
     {
-    case 1:
-        start = high_resolution_clock::now();
-        analyzer.userSearch();
-        stop = high_resolution_clock::now();
-        duration = duration_cast<nanoseconds>(stop - start);
-        logger.log(INFO, "userSearch() completed in " + to_string(duration.count()) + " ns");
-        break;
-
-    case 2:
-        start = high_resolution_clock::now();
-        analyzer.mostFrequent();
-        stop = high_resolution_clock::now();
-        duration = duration_cast<nanoseconds>(stop - start);
-        logger.log(INFO, "mostFrequent() completed in " + to_string(duration.count()) + " ns");
-        cout << "80 most frequent words saved to frequencies.txt\n";
-        break;
-
-    case 3:
-        start = high_resolution_clock::now();
-        analyzer.leastFrequent();
-        stop = high_resolution_clock::now();
-        duration = duration_cast<nanoseconds>(stop - start);
-        logger.log(INFO, "leastFrequent() completed in " + to_string(duration.count()) + " ns");
-        cout << "80 least frequent words saved to frequencies.txt\n";
-        break;
-
-    default:
-        cout << "Invalid choice. Please try again.\n";
-        break;
+        cerr << "Usage: " << argv[0] << " input.txt output.txt [mode]" << endl;
+        cerr << "Modes: auto | menu" << endl;
+        return 1;
     }
-}
 
-int main()
-{
+    const char* inputFile = argv[1];
+    const char* outputFile = argv[2];
+    const char* mode = (argc == 4) ? argv[3] : "auto";
+
+    // Clear the output file for fresh results
+    ofstream clearFile(outputFile);
+    clearFile.close();
+
     Logger logger("logger.txt");
-
     Pattern analyzer(50, 119);
 
-    auto start = high_resolution_clock::now();
-    analyzer.readFile();
-    auto stop = high_resolution_clock::now();
-    auto duration = duration_cast<nanoseconds>(stop - start);
-    logger.log(INFO, "readFile() completed in " + to_string(duration.count()) + " ns");
-
-    while (true)
+    if (strcmp(mode, "auto") == 0)
     {
-        displayMenu();
+        auto start = high_resolution_clock::now();
+        analyzer.readFile();  // performs read + search + frequency tasks
+        auto stop = high_resolution_clock::now();
+        logger.log(INFO, "readFile() completed in " + to_string(duration_cast<nanoseconds>(stop - start).count()) + " ns");
+    }
+    else if (strcmp(mode, "menu") == 0)
+    {
         int choice;
-        cin >> choice;
-        cin.ignore();
+        do {
+            cout << "\n===== Conan Doyle Text Analysis =====\n";
+            cout << "1. Read file\n";
+            cout << "2. Search Work IX\n";
+            cout << "3. 80 most frequent words\n";
+            cout << "4. 80 least frequent words\n";
+            cout << "0. Exit\n";
+            cout << "====================================\n";
+            cout << "Enter your choice: ";
+            cin >> choice;
+            cin.ignore();
 
-        if (choice == 0)
-        {
-            cout << "Exiting program...\n";
-            break;
-        }
+            auto start = high_resolution_clock::now();
+            switch (choice)
+            {
+                case 1:
+                    analyzer.readFile();  // will also call search and frequency unless you refactor
+                    break;
+                case 2:
+                    analyzer.userSearch();
+                    break;
+                case 3:
+                    analyzer.mostFrequent();
+                    break;
+                case 4:
+                    analyzer.leastFrequent();
+                    break;
+                case 0:
+                    cout << "Exiting program...\n";
+                    break;
+                default:
+                    cout << "Invalid choice. Try again.\n";
+            }
+            auto stop = high_resolution_clock::now();
+            logger.log(INFO, "Task " + to_string(choice) + " completed in " + to_string(duration_cast<nanoseconds>(stop - start).count()) + " ns");
 
-        processMenuChoice(analyzer, logger, choice);
+        } while (choice != 0);
+    }
+    else
+    {
+        cerr << "Unknown mode: " << mode << endl;
+        return 1;
     }
 
     return 0;

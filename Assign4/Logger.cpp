@@ -46,3 +46,9 @@ void Logger::log(Level level, const std::string &message)
         log_file.flush();
     }
 }
+
+void Logger::printSentenceCount(std::ofstream& file, int sentenceCount)
+{
+    file << "\n=== Sentence Count ===\n";
+    file << "Total Sentences: " << sentenceCount << "\n";
+}

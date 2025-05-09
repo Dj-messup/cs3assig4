@@ -1,5 +1,6 @@
 #include "Pattern.h"
 using namespace std;
+using namespace std::chrono;
 
 Pattern::Pattern(int chainSize, int linearSize)
 {
@@ -11,16 +12,19 @@ Pattern::Pattern(int chainSize, int linearSize)
     chainInsertCount = 0;
     linearInsertCount = 0;
     sentenceCount = 0;
-    countWordFrequencies("A_Scandal_In_Bohemia.txt", wordCounts);
 }
 
 Pattern::~Pattern()
 {
     delete hashTable;
     delete linearTable;
+    for (size_t i = 0; i < workIXWords.getSize(); i++)
+    {
+        delete[] workIXWords[i];
+    }
 }
 
-void Pattern::processWord(const char *input, char *output)
+void Pattern::processWord(const char* input, char* output)
 {
     int out_pos = 0;
     bool last_was_hyphen = false;
@@ -44,45 +48,26 @@ void Pattern::processWord(const char *input, char *output)
     output[out_pos] = '\0';
 }
 
-void Pattern::countWordFrequencies(const char *filename, DynamicArray<FreqEntry> &wordCounts)
+void Pattern::strConv(char* word)
 {
-    ifstream inputFile(filename);
-    if (!inputFile.is_open())
+    int len = strlen(word);
+    int j = 0;
+    for (int i = 0; i < len; ++i)
     {
-        cerr << "Error opening file: " << filename << endl;
-        return;
-    }
-
-    char word[256], processed[256];
-    while (inputFile >> word)
-    {
-        processWord(word, processed);
-
-        if (strlen(processed) == 0)
+        if (word[i] == '-' && word[i + 1] == '-')
+        {
+            ++i;
             continue;
-
-        bool found = false;
-        for (size_t i = 0; i < wordCounts.getSize(); i++)
-        {
-            if (strcmp(wordCounts[i].word, processed) == 0)
-            {
-                wordCounts[i].count++;
-                found = true;
-                break;
-            }
         }
-
-        if (!found)
+        if (isalpha(word[i]) || word[i] == '-')
         {
-            FreqEntry wf(processed);
-            wordCounts.push_back(wf);
+            word[j++] = tolower(word[i]);
         }
     }
-
-    inputFile.close();
+    word[j] = '\0';
 }
 
-void Pattern::sortWordCounts(DynamicArray<FreqEntry> &wordCounts, bool descending)
+void Pattern::sortWordCounts(DynamicArray<FreqEntry>& wordCounts, bool descending)
 {
     for (size_t i = 0; i < wordCounts.getSize() - 1; i++)
     {
@@ -102,14 +87,10 @@ void Pattern::sortWordCounts(DynamicArray<FreqEntry> &wordCounts, bool descendin
     }
 }
 
-void Pattern::outputFrequencyList(DynamicArray<FreqEntry> &wordCounts, const char *filename, const char *title)
+void Pattern::outputFrequencyList(DynamicArray<FreqEntry>& wordCounts, const char* filename, const char* title)
 {
     ofstream outputFile(filename, ios::app);
-    if (!outputFile.is_open())
-    {
-        cerr << "Error opening output file: " << filename << endl;
-        return;
-    }
+    if (!outputFile.is_open()) return;
 
     outputFile << "\n=== " << title << " ===\n";
     outputFile << "Word\t\tFrequency\n";
@@ -118,25 +99,10 @@ void Pattern::outputFrequencyList(DynamicArray<FreqEntry> &wordCounts, const cha
     size_t limit = wordCounts.getSize() > 80 ? 80 : wordCounts.getSize();
     for (size_t i = 0; i < limit; i++)
     {
-        outputFile << wordCounts[i].word << "\t\t"
-                   << wordCounts[i].count << "\n";
+        outputFile << wordCounts[i].word << "\t\t" << wordCounts[i].count << "\n";
     }
 
     outputFile.close();
-}
-
-void Pattern::mostFrequent()
-{
-    DynamicArray<FreqEntry> mostFrequent = wordCounts;
-    sortWordCounts(mostFrequent, true);
-    outputFrequencyList(mostFrequent, "frequencies.txt", "80 Most Frequent Words");
-}
-
-void Pattern::leastFrequent()
-{
-    DynamicArray<FreqEntry> leastFrequent = wordCounts;
-    sortWordCounts(leastFrequent, false);
-    outputFrequencyList(leastFrequent, "frequencies.txt", "80 Least Frequent Words");
 }
 
 void Pattern::readFile()
@@ -148,53 +114,69 @@ void Pattern::readFile()
         exit(1);
     }
 
-    char word[256], processed[256];
+    char word[256], cleaned[256];
+    char w1[256] = "", w2[256] = "", w3[256] = "", w4[256] = "", w5[256] = "", w6[256] = "";
+
     while (inFile >> word)
     {
+        strcpy(w1, w2); strcpy(w2, w3); strcpy(w3, w4);
+        strcpy(w4, w5); strcpy(w5, w6); strcpy(w6, word);
+
         size_t len = strlen(word);
         if (len > 0 && (word[len - 1] == '.' || word[len - 1] == '!' || word[len - 1] == '?'))
             sentenceCount++;
 
         strConv(word);
+        if (strlen(word) == 0) continue;
 
-        if (strlen(word) == 1 && word[0] >= 'i' && word[0] <= 'x')
-        {
-            workNum++;
-            continue;
-        }
+        if (strcmp(word, "i") == 0) workNum = 1;
+        else if (strcmp(word, "ii") == 0) workNum = 2;
+        else if (strcmp(word, "iii") == 0) workNum = 3;
+        else if (strcmp(word, "iv") == 0) workNum = 4;
+        else if (strcmp(word, "v") == 0) workNum = 5;
+        else if (strcmp(word, "vi") == 0) workNum = 6;
+        else if (strcmp(word, "vii") == 0) workNum = 7;
+        else if (strcmp(word, "viii") == 0) workNum = 8;
+        else if (strcmp(word, "ix") == 0) workNum = 9;
+        else if (strcmp(word, "x") == 0) workNum = 10;
+        else if (strcmp(word, "xi") == 0) workNum = 11;
+        else if (strcmp(word, "xii") == 0) workNum = 12;
 
-        if (strlen(word) == 0)
-            continue;
+        processWord(word, cleaned);
+        if (strlen(cleaned) == 0) continue;
 
         if (workNum >= 1 && workNum <= 6)
         {
-            hashTable->insert(word);
+            hashTable->insert(cleaned);
             chainInsertCount++;
         }
         else if (workNum >= 7 && workNum <= 12)
         {
-            linearTable->insert(word);
+            linearTable->insert(cleaned);
             linearInsertCount++;
         }
 
-        processWord(word, processed);
-        if (strlen(processed) == 0)
-            continue;
+        if (workNum == 9)
+        {
+            char* buffer = new char[256];
+            strcpy(buffer, cleaned);
+            workIXWords.push_back(buffer);
+        }
 
         bool found = false;
         for (size_t i = 0; i < wordCounts.getSize(); ++i)
         {
-            if (strcmp(wordCounts[i].word, processed) == 0)
+            if (strcmp(wordCounts[i].word, cleaned) == 0)
             {
                 wordCounts[i].count++;
                 found = true;
                 break;
             }
         }
-
         if (!found)
         {
-            wordCounts.push_back(FreqEntry(processed));
+            FreqEntry entry(cleaned);
+            wordCounts.push_back(entry);
         }
     }
 
@@ -206,185 +188,80 @@ void Pattern::readFile()
     logger.log(INFO, "Linear inserts: " + to_string(linearInsertCount));
     logger.log(INFO, "Load factor: " + to_string((double)linearInsertCount / linearSize));
     logger.log(INFO, "Sentence count: " + to_string(sentenceCount));
+
+    auto start = high_resolution_clock::now();
+    userSearch();
+    auto stop = high_resolution_clock::now();
+    logger.log(INFO, "userSearch() completed in " + to_string(duration_cast<nanoseconds>(stop - start).count()) + " ns");
+
+    mostFrequent();
+    leastFrequent();
 }
 
 void Pattern::userSearch()
 {
-    string text = extractStoryIX("A_Scandal_In_Bohemia.txt");
-    auto wordsWithPositions = getWordsWithPositions(text);
-
-    string searchText;
-    for (size_t i = 0; i < wordsWithPositions.getSize(); i++)
-    {
-        searchText += wordsWithPositions[i].first + " ";
-    }
-
     cout << "Enter up to 8 search keys, separated by '@@@' if less than 8: ";
-    string input;
-    getline(cin, input);
+    char inputLine[2048];
+    cin.getline(inputLine, 2048);
 
-    auto patterns = splitString(input, "@@@");
-    if (patterns.getSize() > 8)
+    char* tokens[8];
+    int count = 0;
+    char* token = strtok(inputLine, "@@@");
+    while (token != NULL && count < 8)
     {
-        cout << "Warning: Only the first 8 patterns will be used." << endl;
-        DynamicArray<string> temp;
-        for (size_t i = 0; i < 8; i++)
-        {
-            temp.push_back(patterns[i]);
-        }
-        patterns = temp;
+        tokens[count++] = token;
+        token = strtok(NULL, "@@@");
     }
 
     RabinKarp rk;
-    for (size_t p = 0; p < patterns.getSize(); p++)
+
+    for (int k = 0; k < count; k++)
     {
-        if (patterns[p].empty())
-            continue;
-
-        string lowercasePattern;
-        for (char c : patterns[p])
-            lowercasePattern += tolower(c);
-
-        const DynamicArray<int> &occurrences = rk.search(searchText, lowercasePattern);
-
-        cout << "\nPattern: '" << patterns[p] << "' found at word positions: ";
-        if (occurrences.getSize() == 0)
+        char lowered[256];
+        int i = 0;
+        while (tokens[k][i])
         {
-            cout << "Not found";
+            lowered[i] = tolower(tokens[k][i]);
+            i++;
         }
-        else
+        lowered[i] = '\0';
+
+        cout << "\nPattern: '" << lowered << "' found at word positions: ";
+        bool found = false;
+
+        for (size_t i = 0; i < workIXWords.getSize(); i++)
         {
-            for (int i = 0; i < occurrences.getSize(); i++)
+            if (strcmp(workIXWords[i], lowered) == 0)
             {
-                size_t charPos = occurrences[i];
-                size_t spaceCount = 0;
-                for (size_t j = 0; j < charPos; j++)
-                    if (searchText[j] == ' ') spaceCount++;
-                cout << (spaceCount + 1);
-                if (i < occurrences.getSize() - 1) cout << ", ";
+                if (found) cout << ", ";
+                cout << (i + 1);
+                found = true;
             }
         }
+
+        if (!found) cout << "Not found";
         cout << endl;
     }
 }
 
-void Pattern::strConv(char *word)
+void Pattern::mostFrequent()
 {
-    int len = strlen(word);
-    int j = 0;
-    for (int i = 0; i < len; ++i)
-    {
-        if (word[i] == '-' && word[i + 1] == '-')
-        {
-            ++i;
-            continue;
-        }
-        if (isalpha(word[i]) || word[i] == '-')
-        {
-            word[j++] = tolower(word[i]);
-        }
-    }
-    word[j] = '\0';
+    DynamicArray<FreqEntry> most = wordCounts;
+    sortWordCounts(most, true);
+    outputFrequencyList(most, "frequencies.txt", "80 Most Frequent Words");
 }
 
-int Pattern::getCount(const char *word)
+void Pattern::leastFrequent()
+{
+    DynamicArray<FreqEntry> least = wordCounts;
+    sortWordCounts(least, false);
+    outputFrequencyList(least, "frequencies.txt", "80 Least Frequent Words");
+}
+
+int Pattern::getCount(const char* word)
 {
     int count = 0;
-    if (hashTable)
-        count += hashTable->getCount(word);
-    if (linearTable)
-        count += linearTable->getCount(word);
+    if (hashTable) count += hashTable->getCount(word);
+    if (linearTable) count += linearTable->getCount(word);
     return count;
-}
-
-std::string Pattern::extractStoryIX(const std::string &filename)
-{
-    std::ifstream file(filename);
-    if (!file.is_open())
-    {
-        throw std::runtime_error("Error opening file: " + filename);
-    }
-
-    std::stringstream buffer;
-    std::string line;
-    bool inStoryIX = false;
-    const std::string storyStartMarker = "IX. THE ADVENTURE OF THE ENGINEER'S THUMB";
-    const std::string storyEndMarker = "X. THE ADVENTURE OF";
-
-    while (getline(file, line))
-    {
-        if (line.find(storyStartMarker) != std::string::npos)
-        {
-            inStoryIX = true;
-            continue;
-        }
-        if (inStoryIX && line.find(storyEndMarker) != std::string::npos)
-        {
-            break;
-        }
-        if (inStoryIX)
-        {
-            buffer << line << "\n";
-        }
-    }
-
-    if (buffer.str().empty())
-    {
-        throw std::runtime_error("Story IX not found in file");
-    }
-
-    return buffer.str();
-}
-
-DynamicArray<std::string> Pattern::splitString(const std::string &input, const std::string &delimiter)
-{
-    DynamicArray<std::string> tokens;
-    size_t start = 0;
-    size_t end = input.find(delimiter);
-
-    while (end != std::string::npos)
-    {
-        tokens.push_back(input.substr(start, end - start));
-        start = end + delimiter.length();
-        end = input.find(delimiter, start);
-    }
-    tokens.push_back(input.substr(start));
-    return tokens;
-}
-
-DynamicArray<Pair<std::string, size_t>> Pattern::getWordsWithPositions(const std::string &text)
-{
-    DynamicArray<Pair<std::string, size_t>> words;
-    std::string currentWord;
-    size_t position = 0;
-    bool inWord = false;
-
-    for (size_t i = 0; i < text.length(); i++)
-    {
-        if (isalpha(text[i]))
-        {
-            if (!inWord)
-            {
-                position = words.getSize() + 1;
-                inWord = true;
-            }
-            currentWord += tolower(text[i]);
-        }
-        else
-        {
-            if (inWord)
-            {
-                words.push_back(Pair<std::string, size_t>(currentWord, position));
-                currentWord.clear();
-                inWord = false;
-            }
-        }
-    }
-
-    if (!currentWord.empty())
-    {
-        words.push_back(Pair<std::string, size_t>(currentWord, position));
-    }
-
-    return words;
 }
