@@ -1,5 +1,3 @@
-// FinalAssignment.cpp
-
 #include <iostream>
 #include <fstream>
 #include <chrono>
@@ -36,6 +34,27 @@ int main(int argc, char* argv[])
         analyzer.readFile(inFile);
         auto end = high_resolution_clock::now();
         logger.log(INFO, "readFile() completed in "
+                   + to_string(duration_cast<nanoseconds>(end - start).count())
+                   + " ns");
+
+        start = high_resolution_clock::now();
+        analyzer.userSearch();
+        end = high_resolution_clock::now();
+        logger.log(INFO, "userSearch() completed in "
+                   + to_string(duration_cast<nanoseconds>(end - start).count())
+                   + " ns");
+
+        start = high_resolution_clock::now();
+        analyzer.mostFrequent();
+        end = high_resolution_clock::now();
+        logger.log(INFO, "mostFrequent() completed in "
+                   + to_string(duration_cast<nanoseconds>(end - start).count())
+                   + " ns");
+
+        start = high_resolution_clock::now();
+        analyzer.leastFrequent();
+        end = high_resolution_clock::now();
+        logger.log(INFO, "leastFrequent() completed in "
                    + to_string(duration_cast<nanoseconds>(end - start).count())
                    + " ns");
     }
